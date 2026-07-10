@@ -2,6 +2,7 @@
 {% block title %}查重检测 - Python Judge{% endblock %}
 {% block content %}
 <h4><i class="fas fa-search"></i> 代码查重检测</h4>
+<p class="text-muted">基于结构相似度 + Token序列 + 变量命名模式综合分析，仅供教师参考，不作绝对判定。</p>
 
 <div class="card mb-3">
     <div class="card-body">
@@ -11,13 +12,13 @@
                     <option value="">选择题目...</option>
                     {% for p in problems %}
                     <option value="{{ p.id }}" {% if selected_problem and selected_problem.id == p.id %}selected{% endif %}>
-                        #{{ p.id }} {{ p.title[:40] }}
+                        {{ '#%d'|format(p.id) }} {{ (p.title or '')[:50] }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="number" name="threshold" class="form-control" placeholder="相似度阈值" 
+                <input type="number" name="threshold" class="form-control" placeholder="相似度阈值"
                        value="{{ threshold }}" step="0.05" min="0" max="1">
             </div>
             <div class="col-md-2">
@@ -29,34 +30,83 @@
 
 {% if selected_problem %}
 <div class="card">
-    <div class="card-header d-flex justify-content-between">
-        <span><i class="fas fa-file-alt"></i> {{ selected_problem.title }} - 查重结果</span>
-        <span class="text-muted">阈值: ≥ {{ threshold }}</span>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-file-alt"></i> {{ (selected_problem.title or '')[:60] }}</span>
+        <span class="text-muted">
+            {% if results %}
+            <span class="text-danger">发现 {{ results|length }} 对可疑组合</span> (阈值 >= {{ threshold }})
+            {% else %}
+            阈值 >= {{ threshold }}
+            {% endif %}
+        </span>
     </div>
     <div class="card-body p-0">
         {% if results %}
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>相似度</th>
-                    <th>学生A</th>
-                    <th>学生B</th>
-                    <th>提交A</th>
-                    <th>提交B</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in results %}
-                <tr class="{% if r.similarity >= 0.9 %}table-danger{% elif r.similarity >= 0.8 %}table-warning{% endif %}">
-                    <td><strong>{{ (r.similarity * 100)|round(1) }}%</strong></td>
-                    <td>{{ r.student_a }}</td>
-                    <td>{{ r.student_b }}</td>
-                    <td><a href="{{ url_for('submissions.result', submission_id=r.submission_a) }}" target="_blank">#{{ r.submission_a }}</a></td>
-                    <td><a href="{{ url_for('submissions.result', submission_id=r.submission_b) }}" target="_blank">#{{ r.submission_b }}</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 text-center align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>相似度</th>
+                        <th>学生A</th>
+                        <th>班级</th>
+                        <th>得分</th>
+                        <th>提交时间</th>
+                        <th>学生B</th>
+                        <th>班级</th>
+                        <th>得分</th>
+                        <th>提交时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr class="{% if r.similarity >= 0.9 %}table-danger{% elif r.similarity >= 0.8 %}table-warning{% elif r.similarity >= 0.75 %}table-info{% endif %}">
+                        <td>
+                            <strong>{{ (r.similarity * 100)|round(1) }}%</strong>
+                            <br>
+                            {% if r.similarity >= 0.9 %}
+                            <span class="badge bg-danger">极高</span>
+                            {% elif r.similarity >= 0.8 %}
+                            <span class="badge bg-warning text-dark">较高</span>
+                            {% elif r.similarity >= 0.75 %}
+                            <span class="badge bg-info text-dark">可疑</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ r.realname_a or r.student_a }}</strong>
+                            <br><small class="text-muted">@{{ r.student_a }}</small>
+                        </td>
+                        <td><small>{{ r.class_a }}</small></td>
+                        <td>{{ r.score_a|int }}</td>
+                        <td><small>{{ r.time_a }}</small></td>
+                        <td>
+                            <strong>{{ r.realname_b or r.student_b }}</strong>
+                            <br><small class="text-muted">@{{ r.student_b }}</small>
+                        </td>
+                        <td><small>{{ r.class_b }}</small></td>
+                        <td>{{ r.score_b|int }}</td>
+                        <td><small>{{ r.time_b }}</small></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.plagiarism_compare', a=r.submission_a, b=r.submission_b) }}"
+                                   class="btn btn-outline-primary" target="_blank">
+                                    <i class="fas fa-code-compare"></i> 对比
+                                </a>
+                                <a href="{{ url_for('submissions.result', submission_id=r.submission_a) }}"
+                                   class="btn btn-outline-secondary" target="_blank">
+                                    #{{ r.submission_a }}
+                                </a>
+                                <a href="{{ url_for('submissions.result', submission_id=r.submission_b) }}"
+                                   class="btn btn-outline-secondary" target="_blank">
+                                    #{{ r.submission_b }}
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
         <div class="text-center text-muted py-4">
             <i class="fas fa-check-circle fa-2x text-success mb-2"></i>

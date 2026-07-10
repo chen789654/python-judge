@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}代码对比 - Python Judge{% endblock %}
+{% block content %}
+<h4><i class="fas fa-code-compare"></i> 代码对比</h4>
+
+<div class="row mb-3">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <span>
+                    <strong>{{ sub_a.author.real_name or sub_a.author.username }}</strong>
+                    <small class="text-muted">(@{{ sub_a.author.username }})</small>
+                    {% if sub_a.author.class_ %}
+                    <span class="badge bg-secondary">{{ sub_a.author.class_.name }}</span>
+                    {% endif %}
+                </span>
+                <span>
+                    得分: {{ sub_a.score|int }}/{{ sub_a.max_score|int }}
+                    &nbsp;|&nbsp; 提交: {{ sub_a.submitted_at.strftime('%m-%d %H:%M') }}
+                    &nbsp;|&nbsp; <a href="{{ url_for('submissions.result', submission_id=sub_a.id) }}" target="_blank">#{{ sub_a.id }}</a>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <span>
+                    <strong>{{ sub_b.author.real_name or sub_b.author.username }}</strong>
+                    <small class="text-muted">(@{{ sub_b.author.username }})</small>
+                    {% if sub_b.author.class_ %}
+                    <span class="badge bg-secondary">{{ sub_b.author.class_.name }}</span>
+                    {% endif %}
+                </span>
+                <span>
+                    得分: {{ sub_b.score|int }}/{{ sub_b.max_score|int }}
+                    &nbsp;|&nbsp; 提交: {{ sub_b.submitted_at.strftime('%m-%d %H:%M') }}
+                    &nbsp;|&nbsp; <a href="{{ url_for('submissions.result', submission_id=sub_b.id) }}" target="_blank">#{{ sub_b.id }}</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 代码A -->
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header p-1" style="background:#f8f9fa;">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <th style="width:40px;" class="text-muted text-end small">行</th>
+                        <th style="width:40px;" class="text-muted text-end small">状态</th>
+                        <th>代码A</th>
+                    </tr>
+                </table>
+            </div>
+            <div style="max-height:70vh;overflow-y:auto;">
+                <table class="table table-sm table-borderless mb-0" style="font-family:'Consolas','Courier New',monospace;font-size:13px;line-height:1.5;">
+                    {% for line, cls in lines_a %}
+                    <tr class="{% if cls == 'added' %}table-success{% elif cls == 'removed' %}table-danger{% endif %}">
+                        <td style="width:40px;" class="text-muted text-end small select-none">{{ loop.index }}</td>
+                        <td style="width:40px;" class="text-end small select-none">
+                            {% if cls == 'same' %}<span class="text-muted">=</span>
+                            {% elif cls == 'added' %}<span class="text-success">+</span>
+                            {% elif cls == 'removed' %}<span class="text-danger">-</span>
+                            {% endif %}
+                        </td>
+                        <td style="white-space:pre-wrap;word-break:break-all;">{{ line }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- 代码B -->
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header p-1" style="background:#f8f9fa;">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <th style="width:40px;" class="text-muted text-end small">行</th>
+                        <th style="width:40px;" class="text-muted text-end small">状态</th>
+                        <th>代码B</th>
+                    </tr>
+                </table>
+            </div>
+            <div style="max-height:70vh;overflow-y:auto;">
+                <table class="table table-sm table-borderless mb-0" style="font-family:'Consolas','Courier New',monospace;font-size:13px;line-height:1.5;">
+                    {% for line, cls in lines_b %}
+                    <tr class="{% if cls == 'added' %}table-success{% elif cls == 'removed' %}table-danger{% endif %}">
+                        <td style="width:40px;" class="text-muted text-end small select-none">{{ loop.index }}</td>
+                        <td style="width:40px;" class="text-end small select-none">
+                            {% if cls == 'same' %}<span class="text-muted">=</span>
+                            {% elif cls == 'added' %}<span class="text-success">+</span>
+                            {% elif cls == 'removed' %}<span class="text-danger">-</span>
+                            {% endif %}
+                        </td>
+                        <td style="white-space:pre-wrap;word-break:break-all;">{{ line }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.select-none { user-select: none; -webkit-user-select: none; }
+</style>
+{% endblock %}

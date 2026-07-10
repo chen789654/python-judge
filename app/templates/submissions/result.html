@@ -82,7 +82,35 @@
                         <form method="POST" action="{{ url_for('submissions.comment', submission_id=submission.id) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-2">
-                                <textarea name="comment" class="form-control" rows="2" placeholder="输入评语...">{{ submission.teacher_comment or '' }}</textarea>
+                                <textarea id="teacher_comment" name="comment" class="form-control" rows="2" placeholder="输入评语或点击下方快捷评语...">{{ submission.teacher_comment or '' }}</textarea>
+                            </div>
+                            <!-- 快捷评语 -->
+                            <div class="mb-2">
+                                <small class="text-muted">快捷评语（点击填入）：</small>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    {% set level = submission.grade_level or submission.calc_grade_level() %}
+                                    {% if level == '优' %}
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('代码质量很高，逻辑清晰，完成度优秀。')">代码质量高</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('思路正确，代码规范，继续保持。')">思路正确</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('实验完成度很好，所有测试用例均通过。')">完成度好</button>
+                                    {% elif level == '良' %}
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('实验基本完成，代码正确，但部分细节可以进一步优化。')">基本完成可优化</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('思路清晰，建议注意代码的简洁性和可读性。')">注意代码规范</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="fillComment('核心功能已实现，效率上还有提升空间。')">效率可提升</button>
+                                    {% elif level == '中' %}
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('核心功能已实现，但存在较多细节问题，建议对照参考答案学习。')">核心功能已实现</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('基本思路正确，代码实现需要多加练习，注意边界情况。')">思路正确需练习</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('部分测试用例未通过，建议检查逻辑漏洞。')">部分未通过</button>
+                                    {% elif level == '及格' %}
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('勉强通过，核心功能已实现但问题较多，建议重新完成一遍巩固知识。')">勉强通过需巩固</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('需要仔细阅读题目要求，对比参考答案理解正确的实现方式。')">需对照答案</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillComment('代码存在较多错误，建议重新编写并多测试。')">错误较多</button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillComment('未达标，请重新完成本次实验，有问题及时问老师。')">未达标需重做</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillComment('代码无法正确运行，建议从基础开始重新编写。')">需重新编写</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillComment('未通过测试，请认真复习相关知识点后重做。')">复习后重做</button>
+                                    {% endif %}
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-sm btn-primary">保存评语</button>
                         </form>
@@ -156,4 +184,11 @@
         </div>
     </div>
 </div>
+{% block extra_scripts %}
+<script>
+function fillComment(text) {
+    document.getElementById('teacher_comment').value = text;
+}
+</script>
+{% endblock %}
 {% endblock %}

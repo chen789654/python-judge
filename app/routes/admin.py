@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import User, Problem, Submission, Class, TestCase
-from app.services.plagiarism import find_plagiarism
+from app.services.plagiarism import find_plagiarism, highlight_diff
 from sqlalchemy import func
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates/admin')
@@ -192,6 +192,31 @@ def plagiarism():
                            results=results,
                            selected_problem=selected_problem,
                            threshold=threshold)
+
+
+@admin_bp.route('/plagiarism/compare')
+@login_required
+def plagiarism_compare():
+    """代码对比页面（并排显示两段代码diff）"""
+    if not current_user.is_teacher():
+        abort(403)
+
+    sub_a_id = request.args.get('a', type=int)
+    sub_b_id = request.args.get('b', type=int)
+
+    from app.models import Submission
+
+    sub_a = db.session.get(Submission, sub_a_id)
+    sub_b = db.session.get(Submission, sub_b_id)
+
+    if not sub_a or not sub_b:
+        abort(404)
+
+    lines_a, lines_b = highlight_diff(sub_a.source_code, sub_b.source_code)
+
+    return render_template('admin/compare.html',
+                           sub_a=sub_a, sub_b=sub_b,
+                           lines_a=lines_a, lines_b=lines_b)
 
 
 @admin_bp.route('/users')
