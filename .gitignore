@@ -1,0 +1,26 @@
+# 数据库（运行生成，不提交）
+data.sqlite
+*.db
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 沙箱临时文件（运行生成）
+sandbox/
+tmp/
+
+# 环境
+.env
+.venv
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 系统相关
+Thumbs.db
+.DS_Store

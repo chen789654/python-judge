@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}我的班级 - Python Judge{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-chalkboard-teacher"></i> 我的班级</h4>
+    <a href="{{ url_for('classes.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> 创建班级</a>
+</div>
+
+{% if classes %}
+<div class="row">
+    {% for class_ in classes %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-school"></i> {{ class_.name }}</h5>
+                <p class="text-muted mb-1">
+                    <small><i class="fas fa-users"></i> {{ class_.student_count() }} 名学生</small>
+                </p>
+                <p class="text-muted mb-1">
+                    <small><i class="fas fa-key"></i> 邀请码: <strong>{{ class_.invite_code }}</strong></small>
+                </p>
+                <p class="text-muted mb-0">
+                    <small><i class="fas fa-clock"></i> 创建于 {{ class_.created_at.strftime('%Y-%m-%d') }}</small>
+                </p>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="{{ url_for('classes.detail', class_id=class_.id) }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye"></i> 查看详情
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="fas fa-school fa-3x mb-3"></i>
+        <p>你还没有创建任何班级</p>
+        <a href="{{ url_for('classes.create') }}" class="btn btn-success">创建第一个班级</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

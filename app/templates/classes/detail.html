@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ class_.name }} - 班级详情{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-school"></i> {{ class_.name }}</h4>
+    {% if current_user.is_teacher() and class_.teacher_id == current_user.id %}
+    <span class="badge bg-primary fs-6">邀请码: {{ class_.invite_code }}</span>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-users"></i> 学生列表 ({{ students|length }})</div>
+            <div class="card-body p-0">
+                {% if students %}
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>用户名</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                        <tr>
+                            <td>{{ s.student_id or '-' }}</td>
+                            <td>{{ s.real_name or s.username }}</td>
+                            <td>{{ s.username }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <p>暂无学生加入</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-file-alt"></i> 考试/作业</div>
+            <div class="card-body">
+                {% if current_user.is_teacher() %}
+                <a href="#" class="btn btn-primary btn-sm mb-3 disabled"><i class="fas fa-plus"></i> 新建考试（开发中）</a>
+                {% endif %}
+                {% if exams %}
+                <ul class="list-group">
+                    {% for exam in exams %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ exam.title }}</span>
+                        <span class="badge bg-info">{{ exam.exam_type }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center">暂无考试/作业</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}题目列表 - Python Judge{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-list"></i> 题目列表</h4>
+    <div>
+        {% if current_user.is_teacher() %}
+        <a href="{{ url_for('problems.create') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> 新建题目
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 筛选 -->
+<div class="card p-3 mb-3">
+    <form method="GET" class="row g-2">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="搜索题目..." value="{{ request.args.get('search', '') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="difficulty" class="form-select">
+                <option value="">全部难度</option>
+                <option value="easy" {% if request.args.get('difficulty') == 'easy' %}selected{% endif %}>简单</option>
+                <option value="medium" {% if request.args.get('difficulty') == 'medium' %}selected{% endif %}>中等</option>
+                <option value="hard" {% if request.args.get('difficulty') == 'hard' %}selected{% endif %}>困难</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="tag" class="form-control" placeholder="标签筛选..." value="{{ request.args.get('tag', '') }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> 筛选</button>
+        </div>
+    </form>
+</div>
+
+<!-- 题目列表 -->
+{% for problem in problems.items %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5 class="mb-1">
+                    <a href="{{ url_for('problems.detail', problem_id=problem.id) }}" class="text-decoration-none">
+                        {{ problem.title }}
+                    </a>
+                    {% if not problem.visible and current_user.is_teacher() %}
+                    <span class="badge bg-secondary">未发布</span>
+                    {% endif %}
+                </h5>
+                <div>
+                    <span class="badge badge-difficulty-{{ problem.difficulty }}">
+                        {% if problem.difficulty == 'easy' %}简单
+                        {% elif problem.difficulty == 'medium' %}中等
+                        {% else %}困难{% endif %}
+                    </span>
+                    {% for tag in problem.tag_list() %}
+                    <span class="badge bg-info text-dark">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <small class="text-muted">
+                    提交: {{ problem.total_submissions }} |
+                    通过率: {{ problem.accept_rate() }}%
+                </small>
+            </div>
+            <div class="text-end">
+                {% if current_user.is_teacher() %}
+                <a href="{{ url_for('problems.edit', problem_id=problem.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <p>暂无题目</p>
+    </div>
+</div>
+{% endfor %}
+
+<!-- 分页 -->
+{% if problems.pages > 1 %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% for page in problems.iter_pages() %}
+        {% if page %}
+        <li class="page-item {% if page == problems.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('problems.list', page=page, difficulty=request.args.get('difficulty'), tag=request.args.get('tag'), search=request.args.get('search')) }}">{{ page }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

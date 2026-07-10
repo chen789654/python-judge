@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}创建班级{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-plus"></i> 创建新班级</div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">班级名称</label>
+                        <input type="text" name="name" class="form-control" required placeholder="例如: 2024级计算机1班">
+                    </div>
+                    <p class="text-muted small">创建后系统将自动生成邀请码，学生凭码加入。</p>
+                    <button type="submit" class="btn btn-primary w-100">创建</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

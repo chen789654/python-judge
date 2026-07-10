@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}注册 - Python Judge{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4><i class="fas fa-user-plus"></i> 注册</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">用户名 *</label>
+                            <input type="text" name="username" class="form-control" required minlength="3">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">邮箱 *</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">密码 *</label>
+                            <input type="password" name="password" class="form-control" required minlength="6">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">确认密码 *</label>
+                            <input type="password" name="confirm_password" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">真实姓名</label>
+                            <input type="text" name="real_name" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学号/工号</label>
+                            <input type="text" name="student_id" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">角色</label>
+                        <select name="role" class="form-select">
+                            <option value="student">学生</option>
+                            <option value="teacher">教师</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">注册</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('auth.login') }}">已有账号？去登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

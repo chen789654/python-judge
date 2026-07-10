@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}提交代码 - {{ problem.title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-terminal"></i> 提交代码 - {{ problem.title }}</span>
+                <a href="{{ url_for('problems.detail', problem_id=problem.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回题目
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="submitForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-2">
+                        <label class="form-label">Python 代码:</label>
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="source_code" id="codeEditor" class="form-control code-editor" rows="20" spellcheck="false" placeholder="在这里编写你的Python代码..."># 在此编写代码
+# 从标准输入读取数据
+# 将结果输出到标准输出
+
+def solve():
+    data = input().strip()
+    # 你的代码逻辑
+    pass
+
+if __name__ == '__main__':
+    solve()</textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            代码将在安全沙箱中执行，禁止使用危险模块
+                        </small>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> 提交评测
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.getElementById('submitForm')?.addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 评测中...';
+    });
+
+    // Tab键插入空格
+    document.getElementById('codeEditor')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+        }
+    });
+</script>
+{% endblock %}

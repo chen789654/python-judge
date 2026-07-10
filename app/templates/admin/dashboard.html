@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}管理面板 - Python Judge{% endblock %}
+{% block content %}
+<h4><i class="fas fa-chart-bar"></i> 管理面板</h4>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ stats.user_count }}</h3>
+                <small class="text-muted">总用户 (教师 {{ stats.teacher_count }} / 学生 {{ stats.student_count }})</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-success">{{ stats.problem_count }}</h3>
+                <small class="text-muted">题目 (已发布 {{ stats.visible_problems }})</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-info">{{ stats.submission_count }}</h3>
+                <small class="text-muted">总提交</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-success">{{ stats.accepted_count }}</h3>
+                <small class="text-muted">通过 ({{ (stats.accepted_count / stats.submission_count * 100)|round(1) if stats.submission_count > 0 else 0 }}%)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-users"></i> 班级统计</div>
+            <div class="card-body text-center">
+                <h3>{{ stats.class_count }}</h3>
+                <small class="text-muted">班级总数</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="fas fa-clock"></i> 最近提交</span>
+                <a href="{{ url_for('submissions.history') }}?all=1" class="btn btn-sm btn-outline-primary">查看全部</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>用户</th><th>题目</th><th>状态</th><th>得分</th><th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in recent_submissions %}
+                        <tr>
+                            <td>{{ sub.author.username }}</td>
+                            <td><a href="{{ url_for('problems.detail', problem_id=sub.problem_id) }}">{{ sub.problem.title[:20] }}</a></td>
+                            <td>{% if sub.status == 'accepted' %}<span class="status-accepted">通过</span>{% else %}<span class="status-wrong">{{ sub.status }}</span>{% endif %}</td>
+                            <td>{{ sub.score }}</td>
+                            <td><small>{{ sub.submitted_at.strftime('%H:%M') }}</small></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted">暂无提交</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

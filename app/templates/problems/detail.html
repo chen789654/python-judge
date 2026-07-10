@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }} - Python Judge{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- 题目信息 -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ problem.title }}</span>
+                <div>
+                    <span class="badge badge-difficulty-{{ problem.difficulty }}">
+                        {% if problem.difficulty == 'easy' %}简单
+                        {% elif problem.difficulty == 'medium' %}中等
+                        {% else %}困难{% endif %}
+                    </span>
+                    {% if current_user.is_teacher() %}
+                    <a href="{{ url_for('problems.edit', problem_id=problem.id) }}" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="problem-description">
+                    {{ description_html|safe }}
+                </div>
+
+                {% if problem.sample_input or problem.sample_output %}
+                <hr>
+                <h6>示例</h6>
+                <div class="row">
+                    {% if problem.sample_input %}
+                    <div class="col-md-6">
+                        <p><strong>输入:</strong></p>
+                        <pre><code>{{ problem.sample_input }}</code></pre>
+                    </div>
+                    {% endif %}
+                    {% if problem.sample_output %}
+                    <div class="col-md-6">
+                        <p><strong>输出:</strong></p>
+                        <pre><code>{{ problem.sample_output }}</code></pre>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if public_cases %}
+                <hr>
+                <h6>公开测试用例</h6>
+                {% for tc in public_cases %}
+                <div class="mb-2">
+                    <p class="mb-1"><strong>用例 {{ loop.index }}</strong> (权重: {{ tc.score_weight }})</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small>输入:</small>
+                            <pre><code>{{ tc.input_data or '(空)' }}</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <small>期望输出:</small>
+                            <pre><code>{{ tc.expected_output }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="col-md-5">
+        <!-- 提交 -->
+        <div class="card">
+            <div class="card-header">提交代码</div>
+            <div class="card-body">
+                <a href="{{ url_for('problems.submit', problem_id=problem.id) }}" class="btn btn-primary w-100">
+                    <i class="fas fa-terminal"></i> 去写代码
+                </a>
+            </div>
+        </div>
+
+        <!-- 最好成绩 -->
+        {% if best %}
+        <div class="card">
+            <div class="card-header">我的最好成绩</div>
+            <div class="card-body text-center">
+                <h2 class="{% if best.is_accepted() %}status-accepted{% else %}status-wrong{% endif %}">
+                    {{ best.score }}/{{ best.max_score }}
+                </h2>
+                <small class="text-muted">状态: {{ best.status }}</small>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 提交记录 -->
+        {% if submissions %}
+        <div class="card">
+            <div class="card-header">我的提交记录</div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for sub in submissions %}
+                    <a href="{{ url_for('submissions.result', submission_id=sub.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between">
+                        <span>
+                            {% if sub.status == 'accepted' %}
+                            <i class="fas fa-check-circle status-accepted"></i>
+                            {% elif sub.status == 'wrong' %}
+                            <i class="fas fa-times-circle status-wrong"></i>
+                            {% elif sub.status == 'error' %}
+                            <i class="fas fa-exclamation-circle status-error"></i>
+                            {% else %}
+                            <i class="fas fa-clock status-pending"></i>
+                            {% endif %}
+                            {{ sub.submitted_at.strftime('%m-%d %H:%M') }}
+                        </span>
+                        <span>{{ sub.score }}/{{ sub.max_score }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
