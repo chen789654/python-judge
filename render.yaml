@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: python-judge
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --timeout 120 --workers 2
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: python-judge-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JUDGE_TEMP_DIR
+        value: /tmp/sandbox
+      - key: PYTHON_VERSION
+        value: 3.12.3
+
+databases:
+  - name: python-judge-db
+    plan: free
+    databaseName: python_judge

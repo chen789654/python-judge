@@ -1,4 +1,5 @@
 """Flask应用工厂"""
+import os
 from flask import Flask, render_template
 from config import Config
 from app.extensions import db, login_manager, csrf
@@ -25,6 +26,11 @@ def create_app(config_class=Config):
     app.register_blueprint(submissions_bp, url_prefix='/submissions')
     app.register_blueprint(classes_bp, url_prefix='/classes')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+
+    # 创建沙箱目录（判题引擎用）
+    _sandbox_dir = app.config.get('JUDGE_TEMP_DIR',
+                                  os.path.join(app.root_path, '..', 'sandbox'))
+    os.makedirs(_sandbox_dir, exist_ok=True)
 
     # 创建数据库表
     with app.app_context():
