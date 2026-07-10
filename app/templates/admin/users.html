@@ -16,6 +16,7 @@
                     <th>班级</th>
                     <th>提交数</th>
                     <th>注册时间</th>
+                    <th>操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,6 +30,18 @@
                     <td>{{ u.class_.name if u.class_ else '-' }}</td>
                     <td>{{ u.submissions.count() }}</td>
                     <td><small>{{ u.created_at.strftime('%Y-%m-%d') }}</small></td>
+                    <td>
+                        {% if u.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('admin.set_role', user_id=u.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if u.is_teacher() %}
+                            <button type="submit" name="role" value="student" class="btn btn-sm btn-outline-warning" onclick="return confirm('降级为普通学生？')">降为学生</button>
+                            {% else %}
+                            <button type="submit" name="role" value="teacher" class="btn btn-sm btn-outline-primary" onclick="return confirm('提升为教师？')">升为教师</button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

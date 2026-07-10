@@ -83,6 +83,8 @@ class Problem(db.Model):
     sample_input = db.Column(db.Text, default='')
     sample_output = db.Column(db.Text, default='')
     hint = db.Column(db.Text, default='')
+    standard_answer = db.Column(db.Text, default='')          # 标准参考答案代码
+    experiment_order = db.Column(db.Integer, default=0)       # 实验序号(1-16)
     difficulty = db.Column(db.String(16), default='easy')     # easy / medium / hard
     tags = db.Column(db.String(256), default='')              # 逗号分隔的标签
     visible = db.Column(db.Boolean, default=False)            # 是否对学生可见
@@ -148,6 +150,9 @@ class Submission(db.Model):
     exec_time = db.Column(db.Float, default=0)                # 执行时间(ms)
     memory_used = db.Column(db.Float, default=0)              # 内存使用(KB)
     compiler_message = db.Column(db.Text, default='')         # 编译/运行错误信息
+    teacher_comment = db.Column(db.Text, default='')          # 教师评语
+    auto_comment = db.Column(db.Text, default='')             # 自动生成评语
+    grade_level = db.Column(db.String(8), default='')         # 优/良/中/及格/不及格
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
     judged_at = db.Column(db.DateTime)
 
@@ -163,6 +168,34 @@ class Submission(db.Model):
         if self.max_score == 0:
             return 0
         return round(self.score / self.max_score * 100, 1)
+
+    def calc_grade_level(self):
+        """根据得分百分比计算五级制等级"""
+        pct = self.score_percent()
+        if pct >= 90:
+            return '优'
+        elif pct >= 80:
+            return '良'
+        elif pct >= 70:
+            return '中'
+        elif pct >= 60:
+            return '及格'
+        else:
+            return '不及格'
+
+    def generate_auto_comment(self):
+        """根据得分自动生成评语"""
+        pct = self.score_percent()
+        if pct >= 90:
+            return '实验完成度很高，代码逻辑清晰，运行结果完全正确，表现优秀！'
+        elif pct >= 80:
+            return '实验完成良好，代码基本正确，部分细节可进一步优化，继续加油！'
+        elif pct >= 70:
+            return '实验基本完成，核心思路正确，但实现上还有改进空间，建议对照参考答案学习。'
+        elif pct >= 60:
+            return '实验勉强完成，核心功能已实现但存在较多问题，建议重新审视题目要求。'
+        else:
+            return '实验未达标，代码无法正确运行或存在较大偏差，需要重新完成。'
 
     def __repr__(self):
         return f'<Submission {self.id} by User {self.user_id}>'

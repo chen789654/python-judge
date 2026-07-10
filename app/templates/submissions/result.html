@@ -39,15 +39,58 @@
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 border rounded">
-                            <small class="text-muted">执行时间</small>
-                            <div class="fs-5">{{ submission.exec_time }} ms</div>
+                            <small class="text-muted">等级</small>
+                            <div class="fs-5">
+                                {% set level = submission.grade_level or submission.calc_grade_level() %}
+                                {% if level == '优' %}
+                                <span class="status-accepted">{{ level }}</span>
+                                {% elif level == '良' %}
+                                <span style="color:#27ae60;">{{ level }}</span>
+                                {% elif level == '中' %}
+                                <span style="color:#f39c12;">{{ level }}</span>
+                                {% elif level == '及格' %}
+                                <span style="color:#e67e22;">{{ level }}</span>
+                                {% else %}
+                                <span class="status-wrong">{{ level }}</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 border rounded">
                             <small class="text-muted">提交时间</small>
-                            <div class="fs-6">{{ submission.submitted_at.strftime('%H:%M:%S') }}</div>
+                            <div class="fs-6">{{ submission.submitted_at.strftime('%m-%d %H:%M:%S') }}</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 自动评语 -->
+                {% if submission.auto_comment %}
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-robot"></i> 系统评语：</strong>
+                    <span>{{ submission.auto_comment }}</span>
+                </div>
+                {% endif %}
+
+                <!-- 教师评语 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-chalkboard-teacher"></i> 教师评语
+                    </div>
+                    <div class="card-body">
+                        {% if current_user.is_teacher() %}
+                        <form method="POST" action="{{ url_for('submissions.comment', submission_id=submission.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-2">
+                                <textarea name="comment" class="form-control" rows="2" placeholder="输入评语...">{{ submission.teacher_comment or '' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary">保存评语</button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted mb-0">
+                            {{ submission.teacher_comment or '暂无教师评语' }}
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -101,6 +144,14 @@
                 <!-- 提交的代码 -->
                 <h5>提交的代码</h5>
                 <pre><code class="language-python">{{ submission.source_code }}</code></pre>
+
+                <!-- 标准答案（教师可见，或提交后学生可见） -->
+                {% if problem.standard_answer %}
+                <h5 class="mt-3">参考答案</h5>
+                <div class="alert alert-light border">
+                    <pre class="mb-0"><code class="language-python">{{ problem.standard_answer }}</code></pre>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

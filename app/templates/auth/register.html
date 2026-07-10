@@ -32,21 +32,32 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">真实姓名</label>
-                            <input type="text" name="real_name" class="form-control">
+                            <label class="form-label">真实姓名 *</label>
+                            <input type="text" name="real_name" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">学号/工号</label>
-                            <input type="text" name="student_id" class="form-control">
+                            <label class="form-label">学号/工号 *</label>
+                            <input type="text" name="student_id" class="form-control" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">角色</label>
-                        <select name="role" class="form-select">
+                        <select name="role" class="form-select" id="roleSelect" onchange="toggleTeacherCode()">
                             <option value="student">学生</option>
                             <option value="teacher">教师</option>
                         </select>
                     </div>
+                    <div class="mb-3" id="teacherCodeField" style="display:none;">
+                        <label class="form-label">教师注册码</label>
+                        <input type="text" name="teacher_code" class="form-control" placeholder="请输入教师注册码">
+                        <small class="text-muted">联系教师获取注册码</small>
+                    </div>
+                    <script>
+                    function toggleTeacherCode() {
+                        var role = document.getElementById('roleSelect').value;
+                        document.getElementById('teacherCodeField').style.display = role === 'teacher' ? 'block' : 'none';
+                    }
+                    </script>
                     <button type="submit" class="btn btn-primary w-100">注册</button>
                 </form>
                 <div class="text-center mt-3">

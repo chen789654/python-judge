@@ -350,6 +350,10 @@ def judge_submission(submission):
         )
         db.session.add(tr)
 
+    # 自动生成评语和等级
+    submission.auto_comment = submission.generate_auto_comment()
+    submission.grade_level = submission.calc_grade_level()
+
     # 更新题目的统计数据
     problem = submission.problem
     problem.total_submissions = (problem.total_submissions or 0) + 1

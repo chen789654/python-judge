@@ -21,5 +21,8 @@ class Config:
     JUDGE_TEMP_DIR = os.environ.get('JUDGE_TEMP_DIR') or \
         os.path.join(basedir, 'sandbox')
 
+    # 教师注册码（学生选教师角色时需要输入此码）
+    TEACHER_REGISTER_CODE = os.environ.get('TEACHER_REGISTER_CODE') or '20251003'
+
     # 分页
     ITEMS_PER_PAGE = 20

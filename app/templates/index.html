@@ -137,6 +137,19 @@
 </div>
 {% endif %}
 
+<!-- 连接信息 -->
+{% if not current_user.is_authenticated %}
+<div class="card mt-4 bg-light">
+    <div class="card-body text-center py-3">
+        <p class="mb-1 text-muted">
+            <i class="fas fa-info-circle"></i>
+            首次使用请<a href="{{ url_for('auth.register') }}">注册</a>账号，
+            已有账号直接<a href="{{ url_for('auth.login') }}">登录</a>。
+        </p>
+    </div>
+</div>
+{% endif %}
+
 <!-- 最近题目 -->
 {% if recent_problems %}
 <div class="mt-4">

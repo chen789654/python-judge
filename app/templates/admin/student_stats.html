@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}学生成绩明细 - Python Judge{% endblock %}
+{% block content %}
+<h4><i class="fas fa-user-graduate"></i> 学生成绩明细表</h4>
+<p class="text-muted">每次实验取该生最高分记录，按五级制显示</p>
+
+<!-- 班级筛选 -->
+<form method="GET" class="row g-2 mb-3 align-items-center">
+    <div class="col-auto">
+        <select name="class_id" class="form-select" onchange="this.form.submit()">
+            <option value="">全部班级</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}" {% if class_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <span class="text-muted">共 {{ student_rows|length }} 名学生</span>
+    </div>
+</form>
+
+{% if student_rows %}
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm text-center align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th rowspan="2" style="min-width:80px;">姓名</th>
+                <th rowspan="2" style="min-width:60px;">学号</th>
+                <th rowspan="2" style="min-width:50px;">班级</th>
+                {% for exp in experiments %}
+                <th colspan="2" style="min-width:70px;">
+                    <a href="{{ url_for('problems.detail', problem_id=exp.id) }}" class="text-white text-decoration-none" title="{{ exp.title }}">
+                        实验{{ exp.experiment_order }}
+                    </a>
+                </th>
+                {% endfor %}
+                <th rowspan="2" style="min-width:60px;">综合<br>等级</th>
+                <th rowspan="2" style="min-width:50px;">完成<br>题数</th>
+            </tr>
+            <tr>
+                {% for exp in experiments %}
+                <th style="font-weight:normal;font-size:0.8em;">等级</th>
+                <th style="font-weight:normal;font-size:0.8em;">得分</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in student_rows %}
+            <tr>
+                <td><strong>{{ row.student.real_name or row.student.username }}</strong></td>
+                <td>{{ row.student.student_id or '-' }}</td>
+                <td><small>{{ row.student.class_.name if row.student.class_ else '-' }}</small></td>
+
+                {% for exp in experiments %}
+                {% set s = row.scores[exp.id] %}
+                {% if s %}
+                <td style="color:{{ grade_colors.get(s.level, '#666') }};font-weight:bold;">
+                    <a href="{{ url_for('submissions.result', submission_id=s.submission_id) }}" style="color:{{ grade_colors.get(s.level, '#666') }};text-decoration:none;">
+                        {{ s.level }}
+                    </a>
+                </td>
+                <td><small>{{ s.score|int }}/{{ s.max_score|int }}</small></td>
+                {% else %}
+                <td style="color:#ccc;">-</td>
+                <td style="color:#ccc;">-</td>
+                {% endif %}
+                {% endfor %}
+
+                <td style="color:{{ grade_colors.get(row.final_level, '#666') }};font-weight:bold;font-size:1.1em;">
+                    {% if row.final_level != '-' %}
+                    {{ row.final_level }}<br><small>{{ row.final_pct }}%</small>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td><small>{{ row.experiment_count }}/{{ experiments|length }}</small></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">暂无学生数据</div>
+{% endif %}
+
+<!-- 等级说明 -->
+<hr>
+<div class="row text-center small">
+    <div class="col"><span style="color:#27ae60;">■</span> 优 (>=90%)</div>
+    <div class="col"><span style="color:#2ecc71;">■</span> 良 (>=80%)</div>
+    <div class="col"><span style="color:#f39c12;">■</span> 中 (>=70%)</div>
+    <div class="col"><span style="color:#e67e22;">■</span> 及格 (>=60%)</div>
+    <div class="col"><span style="color:#e74c3c;">■</span> 不及格 (<60%)</div>
+</div>
+{% endblock %}

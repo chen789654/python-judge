@@ -20,6 +20,9 @@
                             <th>学号</th>
                             <th>姓名</th>
                             <th>用户名</th>
+                            {% if current_user.is_teacher() and class_.teacher_id == current_user.id %}
+                            <th>操作</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -28,6 +31,14 @@
                             <td>{{ s.student_id or '-' }}</td>
                             <td>{{ s.real_name or s.username }}</td>
                             <td>{{ s.username }}</td>
+                            {% if current_user.is_teacher() and class_.teacher_id == current_user.id %}
+                            <td>
+                                <form method="POST" action="{{ url_for('classes.remove_student', class_id=class_.id, student_id=s.id) }}" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('确定将 {{ s.real_name or s.username }} 移出班级？')">移出</button>
+                                </form>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

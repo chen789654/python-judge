@@ -1,8 +1,9 @@
 """提交记录路由"""
-from flask import Blueprint, render_template, request, abort, jsonify
+from flask import Blueprint, render_template, request, abort, jsonify, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.extensions import db
-from app.models import Submission, TestResult
+from app.models import Submission, TestResult, Problem
+
 
 submissions_bp = Blueprint('submissions', __name__,
                            template_folder='../templates/submissions')
@@ -20,12 +21,32 @@ def result(submission_id):
     if submission.user_id != current_user.id and not current_user.is_teacher():
         abort(403)
 
+    problem = db.session.get(Problem, submission.problem_id)
     test_results = submission.test_results.order_by(TestResult.id).all()
 
     return render_template('submissions/result.html',
                            submission=submission,
+                           problem=problem,
                            test_results=test_results)
 
+
+@submissions_bp.route('/<int:submission_id>/comment', methods=['POST'])
+@login_required
+def comment(submission_id):
+    """教师保存评语"""
+    if not current_user.is_teacher():
+        abort(403)
+
+    submission = db.session.get(Submission, submission_id)
+    if not submission:
+        abort(404)
+
+    teacher_comment = request.form.get('comment', '').strip()
+    submission.teacher_comment = teacher_comment
+    db.session.commit()
+
+    flash('评语已保存', 'success')
+    return redirect(url_for('submissions.result', submission_id=submission_id))
 
 @submissions_bp.route('/history')
 @login_required

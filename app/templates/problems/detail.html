@@ -63,6 +63,14 @@
                 </div>
                 {% endfor %}
                 {% endif %}
+
+                {% if current_user.is_teacher() and problem.standard_answer %}
+                <hr>
+                <h6><i class="fas fa-key"></i> 参考答案 <small class="text-muted">（仅教师可见）</small></h6>
+                <div class="alert alert-light border">
+                    <pre class="mb-0"><code class="language-python">{{ problem.standard_answer }}</code></pre>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

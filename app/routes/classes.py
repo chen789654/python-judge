@@ -101,3 +101,24 @@ def detail(class_id):
                            class_=class_,
                            students=students,
                            exams=exams)
+
+
+@classes_bp.route('/<int:class_id>/remove_student/<int:student_id>', methods=['POST'])
+@login_required
+def remove_student(class_id, student_id):
+    """教师将学生移出班级"""
+    class_ = db.session.get(Class, class_id)
+    if not class_:
+        abort(404)
+    if class_.teacher_id != current_user.id:
+        abort(403)
+
+    student = db.session.get(User, student_id)
+    if not student or student.class_id != class_id:
+        flash('该学生不在此班级中', 'danger')
+        return redirect(url_for('classes.detail', class_id=class_id))
+
+    student.class_id = None
+    db.session.commit()
+    flash(f'已将 {student.real_name or student.username} 移出班级', 'success')
+    return redirect(url_for('classes.detail', class_id=class_id))
